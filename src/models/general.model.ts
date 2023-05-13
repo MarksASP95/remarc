@@ -1,7 +1,5 @@
 export interface ModelDBData {
-  id: string;
-  createdAt: number;
+  id: number;
+  createdAt: Date;
   isDeleted: boolean;
-  deletedAt: number;
-  updatedAt: number;
 }

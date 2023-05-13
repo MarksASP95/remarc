@@ -1,8 +1,8 @@
 import { ModelDBData } from './general.model';
 
-export interface UserCreate {
+export interface RemarcUserCreate {
   name: string;
   email: string;
 }
 
-export interface User extends UserCreate, ModelDBData {}
+export interface RemarcUser extends RemarcUserCreate, ModelDBData {}

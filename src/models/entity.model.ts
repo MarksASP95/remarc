@@ -12,7 +12,8 @@ export interface EntityActionCreate {
   name: string;
   description: string;
   entityId: string;
-  timeIntervalMS: number;
+  timeIntervalMinutes: number;
+  startsAt: Date;
 }
 export interface EntityAction extends EntityActionCreate, ModelDBData {
   ownerId: string;
