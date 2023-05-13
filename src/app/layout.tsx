@@ -1,5 +1,6 @@
 import './globals.css'
 import { Inter } from 'next/font/google'
+import Header from '@/components/header/header.component'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -27,7 +28,12 @@ export default function RootLayout({
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/milligram/1.4.1/milligram.css" />
       </head>
 
-      <body suppressHydrationWarning={true} className={inter.className}>{children}</body>
+      <body suppressHydrationWarning={true} className={inter.className}>
+        <Header></Header>
+        <main className="container">
+          {children}
+        </main>
+      </body>
 
     </html>
   )
