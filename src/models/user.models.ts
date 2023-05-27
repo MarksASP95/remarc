@@ -5,4 +5,6 @@ export interface RemarcUserCreate {
   email: string;
 }
 
-export interface RemarcUser extends RemarcUserCreate, ModelDBData {}
+export interface RemarcUser extends RemarcUserCreate, ModelDBData {
+  uid: string;
+}
