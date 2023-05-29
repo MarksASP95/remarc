@@ -1,0 +1,32 @@
+.entity-page {
+  .entity-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+
+    @media (min-width: 768px) {
+      grid-template-columns: 1fr 1fr;
+    }
+    @media (min-width: 1024px) {
+      grid-template-columns: 1fr 1fr 1fr;
+    }
+    @media (min-width: 1440px) {
+      grid-template-columns: 1fr 1fr 1fr 1fr;
+    }
+
+    &__item {
+      border: 1px solid #606c76;
+      border-radius: 5px;
+      padding: 1rem;
+      cursor: pointer;
+
+      &__title {
+        margin-bottom: 0.8rem;
+        font-weight: bold;
+      }
+      &__remind {
+        margin-left: 0.8rem;
+      }
+    }
+  }
+}

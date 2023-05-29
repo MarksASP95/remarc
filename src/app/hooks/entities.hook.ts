@@ -73,8 +73,56 @@ export const useEntities = () => {
     return true;
   }
 
-  const createEntityAction = async (entityId: string, actionCr: EntityActionCreate): Promise<any> => {
+  const createEntityAction = async (actionCr: EntityActionCreate): Promise<EntityAction> => {
+    const supabase = getSupabaseClient();
     
+    const result = await supabase
+      .from("entity_action")
+      .insert({
+        name: actionCr.name,
+        description: actionCr.description,
+        entity_id: actionCr.entityId,
+        time_interval_minutes: actionCr.timeIntervalMinutes,
+        starts_at: actionCr.startsAt,
+      })
+      .select(`
+        *,
+        entity!inner(owner_id, id)
+      `)
+      .single();
+
+    if (result.error) throw result.error;
+    
+    return {
+      createdAt: new Date(result.data.created_at),
+      description: result.data.description,
+      entityId: result.data.entity.id,
+      id: result.data.id,
+      isDeleted: result.data.is_deleted,
+      name:result.data.name,
+      ownerId: result.data.entity.owner_id,
+      timeIntervalMinutes: result.data.time_interval_minutes,
+      startsAt: result.data.starts_at,
+    };
+  }
+
+  const updateEntityAction = async (actionId: number, partialAction: Partial<EntityActionCreate>): Promise<any> => {
+    const supabase = getSupabaseClient();
+
+    const updateData: any = {};
+    if (partialAction.name) updateData.name = partialAction.name;
+    if (partialAction.name) updateData.description = partialAction.description;
+    if (partialAction.name) updateData.time_interval_minutes = partialAction.timeIntervalMinutes;
+    if (partialAction.name) updateData.starts_at = partialAction.startsAt;
+    
+    const result = await supabase
+      .from("entity_action")
+      .update(updateData)
+      .eq("id", actionId);
+
+    if (result.error) throw result.error;
+
+    return true;
   }
 
   return {
@@ -82,5 +130,6 @@ export const useEntities = () => {
     getEntitiesActions,
     createEntity,
     createEntityAction,
+    updateEntityAction,
   }
 }

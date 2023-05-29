@@ -3,3 +3,5 @@ export interface ModelDBData {
   createdAt: Date;
   isDeleted: boolean;
 }
+
+export type TimeUnit = "minutes" | "hours" | "days" | "weeks" | "months";
