@@ -109,6 +109,7 @@ export const useEntities = () => {
   const deleteAction = (actionId: number) => updateEntityAction(actionId, { isDeleted: true });
 
   const updateEntityAction = async (actionId: number, partialAction: Partial<EntityAction>): Promise<any> => {
+    throw "error";
     const supabase = getSupabaseClient();
 
     const updateData: any = {};

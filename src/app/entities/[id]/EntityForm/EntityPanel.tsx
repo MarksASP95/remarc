@@ -12,6 +12,7 @@ import Image from "next/image";
 import TrashSVG from "../../../assets/svgs/trash.svg";
 import { DivMouseEvent } from "@/models/event.model";
 import z from "zod";
+import { toast, Toaster } from "react-hot-toast";
 
 export interface EntityFormProps {
   entity: Entity;
@@ -44,6 +45,9 @@ export default function EntityPanel({ entity, actions }: EntityFormProps) {
   const [ actionToDelete, setActionToDelete ] = useState<EntityAction | null>(null);
   const [ deletingAction, setDeletingAction ] = useState<boolean>(false);
 
+  const [ actionFormErrorsMap, setActionFormErrorsMap ] 
+    = useState<any>({});
+
   const [ writingToDB, setWritingToDB ] = useState<boolean>(false);
 
     
@@ -64,7 +68,7 @@ export default function EntityPanel({ entity, actions }: EntityFormProps) {
       await deleteAction(actionId);
       const actionIndex = actions.findIndex((a) => a.id === actionId);
       if (actionIndex !== -1) actions.splice(actionIndex, 1);
-      console.log("Action deleted");
+      toast.success("Action deleted");
       setActionToDelete(null);
     } catch (error) {
       console.log("Error deleting action", error);
@@ -125,10 +129,9 @@ export default function EntityPanel({ entity, actions }: EntityFormProps) {
       .then((action) => {
         actions.push(action);
         clearSelectedAction();
-      })
-      .catch((err) => console.log("Err creating", err))
+      });
   }
-  const handleUpdate = (partialAction: Partial<EntityActionCreate>) => {
+  const handleUpdate = (partialAction: Partial<EntityActionCreate>): Promise<any> => {
     return updateEntityAction(selectedActionRef.current!.id, partialAction)
       .then(() => {
         let actionIndex = actions.findIndex((a) => a.id === selectedActionRef.current!.id);
@@ -139,8 +142,7 @@ export default function EntityPanel({ entity, actions }: EntityFormProps) {
         };
 
         clearSelectedAction();
-      })
-      .catch((err) => console.log("Err updating", err))
+      });
   }
 
   const handleSubmit = (values: any) => {
@@ -158,9 +160,10 @@ export default function EntityPanel({ entity, actions }: EntityFormProps) {
     const formCheck = ActionForm.safeParse(values);
 
     if (formCheck.success) {
-      console.log("SUCCESS", formCheck);
+      
     } else {
-      console.log("Error", formCheck.error)
+      setActionFormErrorsMap(formCheck.error.format());
+      console.log("Error", formCheck.error.format())
       return;
     }
 
@@ -195,6 +198,7 @@ export default function EntityPanel({ entity, actions }: EntityFormProps) {
         startsAt,
       };
       writingPromise = handleUpdate(actionUpdateData)
+        .then(() => toast.success("Action updated"));
     } else {
       const actionCr: EntityActionCreate = {
         description: values.action_desc,
@@ -204,97 +208,115 @@ export default function EntityPanel({ entity, actions }: EntityFormProps) {
         startsAt,
       };
 
-      writingPromise = handleCreate(actionCr);
+      writingPromise = handleCreate(actionCr)
+        .then(() => toast.success("Action created"));
     }
 
-    writingPromise.finally(() => setWritingToDB(false));
+    writingPromise
+      .catch(() => toast.error("An error occurred"))
+      .finally(() => setWritingToDB(false));
   }
 
   const { form: actionForm, setFields, reset, data } = useForm({
     onSubmit: handleSubmit,
   });
 
+  const getErrorMessages = (fieldName: string): JSX.Element[] => {
+    return (actionFormErrorsMap[fieldName]?._errors || []).map((errorText: string, i: number) => {
+      return <p key={i} style={{ color: "red" }}>* {errorText}</p>
+    })
+  }
+
   return (
-    <div className="entity-page">
-      <h1>
-        {entity.name}
-      </h1>
-      <br />
+    <>
+      <Toaster />
+      <div className="entity-page">
+        <h1>
+          {entity.name}
+        </h1>
+        <br />
 
-      <div className="row">
-          <h2 style={{ marginRight: 10 }}>
-            Actions
-          </h2>
-          <button onClick={handleAddActionClick} className="button button-outline">
-            Add
-          </button>
+        <div className="row">
+            <h2 style={{ marginRight: 10 }}>
+              Actions
+            </h2>
+            <button onClick={handleAddActionClick} className="button button-outline">
+              Add
+            </button>
+        </div>
+        <div className="entity-actions">
+          {renderEntityActions(actions)}
+        </div>
+
+        <RemarcModal 
+          visible={selectedAction !== undefined} 
+          title={modalTitle} 
+          onBrackdropClick={() => { setSelectedAction(undefined); setActionFormErrorsMap({}); }}
+        >
+          <form ref={actionForm}>
+            <label htmlFor="action_name">Name</label>
+            <input disabled={writingToDB} type="text" placeholder="Name" name="action_name" />
+            {getErrorMessages("action_name")}
+            
+            <label htmlFor="action_desc">Description</label>
+            <textarea disabled={writingToDB} placeholder="Description" name="action_desc" ></textarea>
+            {getErrorMessages("action_desc")}
+
+            <label htmlFor="action_remind_every_value">Remind me every</label>
+            <div className="row">
+              <div className="column">
+                <input disabled={writingToDB} type="number" placeholder="Value" name="action_remind_every_value" />
+                {getErrorMessages("action_remind_every_value")}
+              </div>
+              <div className="column">
+                <select name="action_remind_every_unit">
+                  {timeUnitsOptions}
+                </select>
+              </div>
+            </div>
+
+            <label htmlFor="start_date">Start date</label>
+            <div className="row">
+              <div className="column">
+                <input type="radio" value="now" name="start_date_radio" /> Now
+              </div>
+
+              <div className="column">
+                <input type="radio" value="later" name="start_date_radio" /> Another date
+                <input disabled={data('start_date_radio') === "now"} type="date" name="starts_at" />
+                {getErrorMessages("starts_at")}
+              </div>
+            </div>
+
+            <div className="row">
+              <div className="column"></div>
+              <div className="column">
+                <button disabled={writingToDB} className="button" style={{ width: "100%" }}>
+                  { selectedAction ? "Update" : "Create" }
+                </button>
+              </div>
+              <div className="column"></div>
+            </div>
+          </form>
+        </RemarcModal>
+
+        <RemarcModal
+          visible={!!actionToDelete}
+          acceptButtonConfig={{
+            fn: () => confirmDeleteAction(actionToDelete!.id),
+            loading: deletingAction,
+          }}
+          cancelButtonConfig={{
+            fn: closeActionDeleteModal,
+            loading: deletingAction,
+          }}
+        >
+          <p>
+            Are you sure of deleting "{actionToDelete?.name}"
+          </p>
+        </RemarcModal>
       </div>
-      <div className="entity-actions">
-        {renderEntityActions(actions)}
-      </div>
-
-      <RemarcModal 
-        visible={selectedAction !== undefined} 
-        title={modalTitle} 
-        onBrackdropClick={() => { setSelectedAction(undefined) }}
-      >
-        <form ref={actionForm}>
-          <label htmlFor="action_name">Name</label>
-          <input disabled={writingToDB} type="text" placeholder="Name" name="action_name" />
-          
-          <label htmlFor="action_desc">Description</label>
-          <textarea disabled={writingToDB} placeholder="Description" name="action_desc" ></textarea>
-
-          <label htmlFor="action_remind_every_value">Remind me every</label>
-          <div className="row">
-            <div className="column">
-              <input disabled={writingToDB} type="number" placeholder="Value" name="action_remind_every_value" />
-            </div>
-            <div className="column">
-              <select name="action_remind_every_unit">
-                {timeUnitsOptions}
-              </select>
-            </div>
-          </div>
-
-          <label htmlFor="start_date">Start date</label>
-          <div className="row">
-            <div className="column">
-              <input type="radio" value="now" name="start_date_radio" /> Now
-            </div>
-
-            <div className="column">
-              <input type="radio" value="later" name="start_date_radio" /> Another date
-              <input disabled={data('start_date_radio') === "now"} type="date" name="starts_at" />
-            </div>
-          </div>
-
-          <div className="row">
-            <div className="column"></div>
-            <div className="column">
-              <button disabled={writingToDB} className="button" style={{ width: "100%" }}>
-                { selectedAction ? "Update" : "Create" }
-              </button>
-            </div>
-            <div className="column"></div>
-          </div>
-        </form>
-      </RemarcModal>
-
-      <RemarcModal
-        visible={!!actionToDelete}
-        acceptButtonConfig={{
-          fn: () => confirmDeleteAction(actionToDelete!.id),
-        }}
-        cancelButtonConfig={{
-          fn: closeActionDeleteModal,
-        }}
-      >
-        <p>
-          Are you sure of deleting "{actionToDelete?.name}"
-        </p>
-      </RemarcModal>
-    </div>
+    </>
   );  
 }
 
