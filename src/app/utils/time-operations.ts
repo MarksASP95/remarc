@@ -36,3 +36,11 @@ export const minutesToNormalizedUnit = (
   const timeDays = timeHours / 24;
   return { value: transformValue(timeDays), unit: "days" };
 }
+
+export const dateToInputValue = (date: Date): string => {
+  const month = date.getMonth() + 1;
+  const monthWithZero: string = month < 10 ? `0${month}` : "" + month;
+  const dateDay = date.getDate() + 1;
+  const dateDayWithZero: string = dateDay < 10 ? `0${dateDay}` : "" + dateDay;
+  return `${date.getFullYear()}-${monthWithZero}-${dateDayWithZero}`;
+}

@@ -6,7 +6,7 @@ import { RemarcModal } from "@/app/components/RemarcModal/RemarcModal";
 import { useRef, useState } from "react";
 import { useForm } from "@felte/react";
 import { TimeUnit } from "@/models/general.model";
-import { minutesToNormalizedUnit, normalizedUnitToMinutes } from "@/app/utils/time-operations";
+import { dateToInputValue, minutesToNormalizedUnit, normalizedUnitToMinutes } from "@/app/utils/time-operations";
 import { useEntities } from '../../../hooks/entities.hook';
 
 export interface EntityFormProps {
@@ -52,11 +52,14 @@ export default function EntityPanel({ entity, actions }: EntityFormProps) {
     setFields("action_desc", action.description);
     setFields("action_remind_every_value", intervalValue);
     setFields("action_remind_every_unit", intervalUnit);
+    setFields("start_date_radio", "later");
+    setFields("starts_at", dateToInputValue(action.startsAt));
     setSelectedAction(action);
   }
 
   const handleAddActionClick = () => {
     reset();
+    setFields("start_date_radio", "now");
     setSelectedAction(null);
   }
 
@@ -86,7 +89,6 @@ export default function EntityPanel({ entity, actions }: EntityFormProps) {
   const handleCreate = (actionCr: EntityActionCreate) => {
     return createEntityAction(actionCr)
       .then((action) => {
-        console.log("Success!")
         actions.push(action);
         clearSelectedAction();
       })
@@ -102,7 +104,6 @@ export default function EntityPanel({ entity, actions }: EntityFormProps) {
           ...partialAction,
         };
 
-        console.log("Success");
         clearSelectedAction();
       })
       .catch((err) => console.log("Err updating", err))
@@ -113,7 +114,9 @@ export default function EntityPanel({ entity, actions }: EntityFormProps) {
 
     const { 
       action_remind_every_value, 
-      action_remind_every_unit 
+      action_remind_every_unit ,
+      start_date_radio,
+      starts_at,
     } = values;
 
     const timeIntervalMinutes: number = normalizedUnitToMinutes({ 
@@ -123,12 +126,21 @@ export default function EntityPanel({ entity, actions }: EntityFormProps) {
 
     setWritingToDB(true);
     let writingPromise: Promise<any>;
+
+    let startsAt: Date;
+    if (start_date_radio === "now") {
+      startsAt = new Date();
+    } else {
+      startsAt = new Date(starts_at);
+    }
+
     if (!!selectedActionRef.current) {
       const actionUpdateData: Partial<EntityActionCreate> = {
         description: values.action_desc,
         name: values.action_name,
         timeIntervalMinutes,
-      }
+        startsAt,
+      };
       writingPromise = handleUpdate(actionUpdateData)
     } else {
       const actionCr: EntityActionCreate = {
@@ -136,7 +148,7 @@ export default function EntityPanel({ entity, actions }: EntityFormProps) {
         name: values.action_name,
         timeIntervalMinutes,
         entityId: entity.id,
-        startsAt: new Date(),
+        startsAt,
       };
 
       writingPromise = handleCreate(actionCr);
@@ -189,6 +201,18 @@ export default function EntityPanel({ entity, actions }: EntityFormProps) {
               <select name="action_remind_every_unit">
                 {timeUnitsOptions}
               </select>
+            </div>
+          </div>
+
+          <label htmlFor="start_date">Start date</label>
+          <div className="row">
+            <div className="column">
+              <input type="radio" value="now" name="start_date_radio" /> Now
+            </div>
+
+            <div className="column">
+              <input type="radio" value="later" name="start_date_radio" /> Another date
+              <input disabled={data('start_date_radio') === "now"} type="date" name="starts_at" />
             </div>
           </div>
 

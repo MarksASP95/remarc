@@ -102,7 +102,7 @@ export const useEntities = () => {
       name:result.data.name,
       ownerId: result.data.entity.owner_id,
       timeIntervalMinutes: result.data.time_interval_minutes,
-      startsAt: result.data.starts_at,
+      startsAt: new Date(result.data.starts_at),
     };
   }
 
@@ -111,9 +111,9 @@ export const useEntities = () => {
 
     const updateData: any = {};
     if (partialAction.name) updateData.name = partialAction.name;
-    if (partialAction.name) updateData.description = partialAction.description;
-    if (partialAction.name) updateData.time_interval_minutes = partialAction.timeIntervalMinutes;
-    if (partialAction.name) updateData.starts_at = partialAction.startsAt;
+    if (partialAction.description) updateData.description = partialAction.description;
+    if (partialAction.timeIntervalMinutes) updateData.time_interval_minutes = partialAction.timeIntervalMinutes;
+    if (partialAction.startsAt) updateData.starts_at = partialAction.startsAt;
     
     const result = await supabase
       .from("entity_action")
