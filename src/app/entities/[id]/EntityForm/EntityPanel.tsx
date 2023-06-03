@@ -8,6 +8,9 @@ import { useForm } from "@felte/react";
 import { TimeUnit } from "@/models/general.model";
 import { dateToInputValue, minutesToNormalizedUnit, normalizedUnitToMinutes } from "@/app/utils/time-operations";
 import { useEntities } from '../../../hooks/entities.hook';
+import Image from "next/image";
+import TrashSVG from "../../../assets/svgs/trash.svg";
+import { DivMouseEvent } from "@/models/event.model";
 
 export interface EntityFormProps {
   entity: Entity;
@@ -31,8 +34,14 @@ const timeUnitsOptions = Object.entries(timeUnitsDict).map(([ key, value ]) => {
 export default function EntityPanel({ entity, actions }: EntityFormProps) {
 
   let modalTitle: string = "";
+
+  const { createEntityAction, updateEntityAction, deleteAction } = useEntities();
+
   const [ selectedAction, setSelectedAction ] 
     = useState<EntityAction | null | undefined>(undefined);
+
+  const [ actionToDelete, setActionToDelete ] = useState<EntityAction | null>(null);
+  const [ deletingAction, setDeletingAction ] = useState<boolean>(false);
 
   const [ writingToDB, setWritingToDB ] = useState<boolean>(false);
 
@@ -42,6 +51,26 @@ export default function EntityPanel({ entity, actions }: EntityFormProps) {
 
   if (!!selectedAction) modalTitle = `Edit "${selectedAction.name}"`;
   if (selectedAction === null) modalTitle = "Create action";
+
+  const closeActionDeleteModal = () => setActionToDelete(null);
+  const handleActionDeleteClick = (e: DivMouseEvent, action: EntityAction) => {
+    e.stopPropagation();
+    setActionToDelete(action);
+  }
+  const confirmDeleteAction = async (actionId: number) => {
+    setDeletingAction(true);
+    try {
+      await deleteAction(actionId);
+      const actionIndex = actions.findIndex((a) => a.id === actionId);
+      if (actionIndex !== -1) actions.splice(actionIndex, 1);
+      console.log("Action deleted");
+      setActionToDelete(null);
+    } catch (error) {
+      console.log("Error deleting action", error);
+    } finally {
+      setDeletingAction(false);
+    }
+  }
 
   const handleActionClick = (action: EntityAction) => {
     const { 
@@ -75,14 +104,18 @@ export default function EntityPanel({ entity, actions }: EntityFormProps) {
 
       return (
         <div onClick={() => handleActionClick(action)} key={action.id} className="entity-actions__item">
+          <div onClick={(e) => handleActionDeleteClick(e, action)} className="entity-actions__item__delete">
+            <Image 
+              src={TrashSVG}
+              alt="Trash icon"
+            />
+          </div>
           <p className="entity-actions__item__title">{action.name}</p>
           <small className="entity-actions__item__remind">Remind every {timeValue} {timeUnitsDict[timeUnit]} </small>
         </div>
       );
     });
   }
-
-  const { createEntityAction, updateEntityAction } = useEntities();
 
   const clearSelectedAction = setSelectedAction.bind(undefined, undefined);
 
@@ -226,6 +259,20 @@ export default function EntityPanel({ entity, actions }: EntityFormProps) {
             <div className="column"></div>
           </div>
         </form>
+      </RemarcModal>
+
+      <RemarcModal
+        visible={!!actionToDelete}
+        acceptButtonConfig={{
+          fn: () => confirmDeleteAction(actionToDelete!.id),
+        }}
+        cancelButtonConfig={{
+          fn: closeActionDeleteModal,
+        }}
+      >
+        <p>
+          Are you sure of deleting "{actionToDelete?.name}"
+        </p>
       </RemarcModal>
     </div>
   );  

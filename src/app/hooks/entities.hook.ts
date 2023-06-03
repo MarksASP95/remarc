@@ -106,7 +106,9 @@ export const useEntities = () => {
     };
   }
 
-  const updateEntityAction = async (actionId: number, partialAction: Partial<EntityActionCreate>): Promise<any> => {
+  const deleteAction = (actionId: number) => updateEntityAction(actionId, { isDeleted: true });
+
+  const updateEntityAction = async (actionId: number, partialAction: Partial<EntityAction>): Promise<any> => {
     const supabase = getSupabaseClient();
 
     const updateData: any = {};
@@ -114,6 +116,7 @@ export const useEntities = () => {
     if (partialAction.description) updateData.description = partialAction.description;
     if (partialAction.timeIntervalMinutes) updateData.time_interval_minutes = partialAction.timeIntervalMinutes;
     if (partialAction.startsAt) updateData.starts_at = partialAction.startsAt;
+    if (partialAction.isDeleted === true) updateData.is_deleted = true;
     
     const result = await supabase
       .from("entity_action")
@@ -131,5 +134,6 @@ export const useEntities = () => {
     createEntity,
     createEntityAction,
     updateEntityAction,
+    deleteAction,
   }
 }

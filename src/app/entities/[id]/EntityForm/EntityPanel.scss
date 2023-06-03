@@ -19,6 +19,7 @@
       border-radius: 5px;
       padding: 1rem;
       cursor: pointer;
+      position: relative;
 
       &__title {
         margin-bottom: 0.8rem;
@@ -26,6 +27,12 @@
       }
       &__remind {
         margin-left: 0.8rem;
+      }
+      &__delete {
+        position: absolute;
+        top: 6px;
+        right: 6px;
+        height: 10px;
       }
     }
   }

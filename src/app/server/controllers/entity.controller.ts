@@ -57,6 +57,7 @@ export class EntityController {
         *,
         entity!inner(owner_id, id)
       `)
+      .eq("is_deleted", false)
       .eq("entity.id", entityId)
       .eq("entity.owner_id", 1);
 
