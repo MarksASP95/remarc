@@ -11,6 +11,7 @@ import { useEntities } from '../../../hooks/entities.hook';
 import Image from "next/image";
 import TrashSVG from "../../../assets/svgs/trash.svg";
 import { DivMouseEvent } from "@/models/event.model";
+import z from "zod";
 
 export interface EntityFormProps {
   entity: Entity;
@@ -145,6 +146,24 @@ export default function EntityPanel({ entity, actions }: EntityFormProps) {
   const handleSubmit = (values: any) => {
     if (writingToDB) return;
 
+    const ActionForm = z.object({
+      action_name: z.string().min(4, { message: "At least 4 characters" }),
+      action_desc: z.string().min(4, { message: "At least 4 characters" }),
+      action_remind_every_value: z.number().min(1, { message: "Must be at least 1" }),
+      action_remind_every_unit: z.string(),
+      start_date_radio: z.enum(["now", "later"] as const),
+      starts_at: z.string(),
+    });
+
+    const formCheck = ActionForm.safeParse(values);
+
+    if (formCheck.success) {
+      console.log("SUCCESS", formCheck);
+    } else {
+      console.log("Error", formCheck.error)
+      return;
+    }
+
     const { 
       action_remind_every_value, 
       action_remind_every_unit ,
@@ -164,6 +183,7 @@ export default function EntityPanel({ entity, actions }: EntityFormProps) {
     if (start_date_radio === "now") {
       startsAt = new Date();
     } else {
+      if (!starts_at) return console.log("Enter a valid date");
       startsAt = new Date(starts_at);
     }
 
