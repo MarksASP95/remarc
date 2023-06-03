@@ -74,7 +74,7 @@ export class EntityController {
         name:item.name,
         ownerId: item.entity.owner_id,
         timeIntervalMinutes: item.time_interval_minutes,
-        startsAt: item.starts_at,
+        startsAt: new Date(item.starts_at),
       };
 
       return entityAction;
