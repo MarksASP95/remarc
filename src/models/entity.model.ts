@@ -5,7 +5,8 @@ export interface EntityCreate {
   description: string;
 }
 export interface Entity extends EntityCreate, ModelDBData {
-  ownerId: string;
+  ownerId: number;
+  ownerUID: string;
 }
 
 export interface EntityActionCreate {
@@ -17,6 +18,7 @@ export interface EntityActionCreate {
 }
 export interface EntityAction extends EntityActionCreate, ModelDBData {
   ownerId: string;
+  ownerUID: string;
 }
 
 
