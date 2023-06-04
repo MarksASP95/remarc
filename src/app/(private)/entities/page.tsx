@@ -3,8 +3,10 @@
 import { useEffect, useState } from "react";
 import "./entities.page.scss";
 import { Entity } from '@/models/entity.model';
-import { useEntities } from "../hooks/entities.hook";
+import { useEntities } from "../../hooks/entities.hook";
 import Link from "next/link";
+import { useAuth } from "../../hooks/auth.hooks";
+import RemarcSpinner from "@/app/components/RemarcSpinner/RemarcSpinner.component";
 
 export default function EntitiesPage() {
 
@@ -20,7 +22,7 @@ export default function EntitiesPage() {
   }, []);
 
   const getEntitiesEls = () => {
-    if (entities === undefined) return "Loading..."
+    if (entities === undefined) return null;
     if (!entities) return null;
 
     return entities.map((entity) => {
@@ -41,6 +43,7 @@ export default function EntitiesPage() {
       <h1>Entities</h1>
       <br />
       
+      { !entities && <RemarcSpinner /> }
       <div className="entities-grid">
         {getEntitiesEls()}
       </div>

@@ -3,11 +3,16 @@ import { supabaseAdmin } from '../db/supabase';
 
 export class EntityController {
 
+  ownerUID: string;
+  constructor(ownerUID: string) {
+    this.ownerUID = ownerUID;
+  }
+
   async getEntity(id: number): Promise<Entity | undefined> {
     const result = await supabaseAdmin
       .from("entity")
       .select()
-      .eq("owner_id", 1)
+      .eq("owner_uid", this.ownerUID)
       .eq("id", id)
       .single();
 
@@ -22,6 +27,7 @@ export class EntityController {
       id: data.id,
       isDeleted: data.is_deleted,
       ownerId: data.owner_id,
+      ownerUID: data.owner_uid,
     };
 
     return entity;
@@ -31,7 +37,7 @@ export class EntityController {
     const result = await supabaseAdmin
       .from("entity")
       .select()
-      .eq("owner_id", 1);
+      .eq("owner_uid", this.ownerUID);
 
     if (result.error) throw result.error;
 
@@ -44,6 +50,7 @@ export class EntityController {
         id: item.id,
         isDeleted: item.is_deleted,
         ownerId: item.owner_id,
+        ownerUID: item.owner_uid,
       };
 
       return entity;
@@ -55,11 +62,11 @@ export class EntityController {
       .from("entity_action")
       .select(`
         *,
-        entity!inner(owner_id, id)
+        entity!inner(owner_uid, owner_uid)
       `)
       .eq("is_deleted", false)
       .eq("entity.id", entityId)
-      .eq("entity.owner_id", 1);
+      .eq("entity.owner_uid", this.ownerUID);
 
     if (result.error) throw result.error;
 
@@ -76,27 +83,11 @@ export class EntityController {
         ownerId: item.entity.owner_id,
         timeIntervalMinutes: item.time_interval_minutes,
         startsAt: new Date(item.starts_at),
+        ownerUID: item.owner_uid
       };
 
       return entityAction;
     });
-  }
-
-  async createEntity(entityCr: EntityCreate): Promise<any> {
-    const data = {
-      name: entityCr.name,
-      description: entityCr.description,
-      owner_id: 1,
-    };
-    const result = await supabaseAdmin.from("entity").insert(data);
-
-    if (result.error) throw result.error;
-
-    return true;
-  }
-
-  async createEntityAction(entityId: string, actionCr: EntityActionCreate): Promise<any> {
-    
   }
 
 }

@@ -1,15 +1,15 @@
 "use client";
 
 import "./EntityPanel.scss"
-import { Entity, EntityAction, EntityActionCreate, EntityActionEventCreate } from "@/models/entity.model";
+import { Entity, EntityAction, EntityActionCreate } from "@/models/entity.model";
 import { RemarcModal } from "@/app/components/RemarcModal/RemarcModal";
 import { useRef, useState } from "react";
 import { useForm } from "@felte/react";
 import { TimeUnit } from "@/models/general.model";
 import { dateToInputValue, minutesToNormalizedUnit, normalizedUnitToMinutes } from "@/app/utils/time-operations";
-import { useEntities } from '../../../hooks/entities.hook';
+import { useEntities } from '../../../../hooks/entities.hook';
 import Image from "next/image";
-import TrashSVG from "../../../assets/svgs/trash.svg";
+import TrashSVG from "../../../../assets/svgs/trash.svg";
 import { DivMouseEvent } from "@/models/event.model";
 import z from "zod";
 import { toast, Toaster } from "react-hot-toast";
@@ -213,7 +213,10 @@ export default function EntityPanel({ entity, actions }: EntityFormProps) {
     }
 
     writingPromise
-      .catch(() => toast.error("An error occurred"))
+      .catch((err) => {
+        console.log(err);
+        toast.error("An error occurred")
+      })
       .finally(() => setWritingToDB(false));
   }
 

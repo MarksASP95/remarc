@@ -1,14 +1,18 @@
 import { Entity, EntityAction, EntityActionCreate, EntityCreate } from '@/models/entity.model';
 import { getSupabaseClient } from '../utils/supabase';
+import { useAuth } from './auth.hooks';
 
 export const useEntities = () => {
 
+  const { getCurrentRemarcUser } = useAuth();
+
   const getEntities = async (): Promise<Entity[]> => {
     const supabase = getSupabaseClient();
+    const { uid } = (await getCurrentRemarcUser())!;
     const result = await supabase
       .from("entity")
       .select()
-      .eq("owner_id", 1)
+      .eq("owner_uid", uid)
       .eq("is_deleted", false);
 
     if (result.error) throw result.error;
@@ -22,6 +26,7 @@ export const useEntities = () => {
         id: item.id,
         isDeleted: item.is_deleted,
         ownerId: item.owner_id,
+        ownerUID: item.owner_uid
       };
 
       return entity;
@@ -30,13 +35,14 @@ export const useEntities = () => {
 
   const getEntitiesActions = async (): Promise<EntityAction[]> => {
     const supabase = getSupabaseClient();
+    const { uid } = (await getCurrentRemarcUser())!;
     const result = await supabase
       .from("entity_action")
       .select(`
         *,
-        entity!inner(owner_id, id)
+        entity!inner(owner_uid, owner_uid)
       `)
-      .eq("entity.owner_id", 1);
+      .eq("entity.owner_uid", uid);
 
     if (result.error) throw result.error;
 
@@ -53,6 +59,7 @@ export const useEntities = () => {
         ownerId: item.entity.owner_id,
         timeIntervalMinutes: item.time_interval_minutes,
         startsAt: item.starts_at,
+        ownerUID: uid,
       };
 
       return entityAction;
@@ -61,10 +68,12 @@ export const useEntities = () => {
 
   const createEntity = async (entityCr: EntityCreate): Promise<any> => {
     const supabase = getSupabaseClient();
+    const { uid, id } = (await getCurrentRemarcUser())!;
     const data = {
       name: entityCr.name,
       description: entityCr.description,
-      owner_id: 1,
+      owner_id: id,
+      owner_uid: uid,
     };
     const result = await supabase.from("entity").insert(data);
 
@@ -75,6 +84,7 @@ export const useEntities = () => {
 
   const createEntityAction = async (actionCr: EntityActionCreate): Promise<EntityAction> => {
     const supabase = getSupabaseClient();
+    const { uid } = (await getCurrentRemarcUser())!;
     
     const result = await supabase
       .from("entity_action")
@@ -84,6 +94,7 @@ export const useEntities = () => {
         entity_id: actionCr.entityId,
         time_interval_minutes: actionCr.timeIntervalMinutes,
         starts_at: actionCr.startsAt,
+        owner_uid: uid,
       })
       .select(`
         *,
@@ -103,13 +114,13 @@ export const useEntities = () => {
       ownerId: result.data.entity.owner_id,
       timeIntervalMinutes: result.data.time_interval_minutes,
       startsAt: new Date(result.data.starts_at),
+      ownerUID: uid,
     };
   }
 
   const deleteAction = (actionId: number) => updateEntityAction(actionId, { isDeleted: true });
 
   const updateEntityAction = async (actionId: number, partialAction: Partial<EntityAction>): Promise<any> => {
-    throw "error";
     const supabase = getSupabaseClient();
 
     const updateData: any = {};
