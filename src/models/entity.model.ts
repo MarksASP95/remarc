@@ -15,11 +15,11 @@ export interface EntityActionCreate {
   entityId: number;
   timeIntervalMinutes: number;
   startsAt: Date;
+  nextAt: Date;
 }
 export interface EntityAction extends EntityActionCreate, ModelDBData {
   ownerId: string;
   ownerUID: string;
-  nextAt: Date;
 }
 
 

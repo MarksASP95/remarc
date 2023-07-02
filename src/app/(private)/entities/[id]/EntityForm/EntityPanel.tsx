@@ -206,6 +206,7 @@ export default function EntityPanel({ entity, actions }: EntityFormProps) {
         timeIntervalMinutes,
         entityId: entity.id,
         nextAt,
+        startsAt: values.starts_at,
       };
 
       writingPromise = handleCreate(actionCr)
