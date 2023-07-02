@@ -19,6 +19,7 @@ export interface EntityActionCreate {
 export interface EntityAction extends EntityActionCreate, ModelDBData {
   ownerId: string;
   ownerUID: string;
+  nextAt: Date;
 }
 
 

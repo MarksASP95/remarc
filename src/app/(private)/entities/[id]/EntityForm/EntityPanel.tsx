@@ -87,7 +87,7 @@ export default function EntityPanel({ entity, actions }: EntityFormProps) {
     setFields("action_remind_every_value", intervalValue);
     setFields("action_remind_every_unit", intervalUnit);
     setFields("start_date_radio", "later");
-    setFields("starts_at", dateToInputValue(action.startsAt));
+    setFields("next_at", dateToInputValue(action.nextAt));
     setSelectedAction(action);
   }
 
@@ -154,7 +154,7 @@ export default function EntityPanel({ entity, actions }: EntityFormProps) {
       action_remind_every_value: z.number().min(1, { message: "Must be at least 1" }),
       action_remind_every_unit: z.string(),
       start_date_radio: z.enum(["now", "later"] as const),
-      starts_at: z.string(),
+      next_at: z.string(),
     });
 
     const formCheck = ActionForm.safeParse(values);
@@ -171,7 +171,7 @@ export default function EntityPanel({ entity, actions }: EntityFormProps) {
       action_remind_every_value, 
       action_remind_every_unit ,
       start_date_radio,
-      starts_at,
+      next_at,
     } = values;
 
     const timeIntervalMinutes: number = normalizedUnitToMinutes({ 
@@ -182,12 +182,12 @@ export default function EntityPanel({ entity, actions }: EntityFormProps) {
     setWritingToDB(true);
     let writingPromise: Promise<any>;
 
-    let startsAt: Date;
+    let nextAt: Date;
     if (start_date_radio === "now") {
-      startsAt = new Date();
+      nextAt = new Date();
     } else {
-      if (!starts_at) return console.log("Enter a valid date");
-      startsAt = new Date(starts_at);
+      if (!next_at) return console.log("Enter a valid date");
+      nextAt = new Date(next_at);
     }
 
     if (!!selectedActionRef.current) {
@@ -195,7 +195,7 @@ export default function EntityPanel({ entity, actions }: EntityFormProps) {
         description: values.action_desc,
         name: values.action_name,
         timeIntervalMinutes,
-        startsAt,
+        nextAt,
       };
       writingPromise = handleUpdate(actionUpdateData)
         .then(() => toast.success("Action updated"));
@@ -205,7 +205,7 @@ export default function EntityPanel({ entity, actions }: EntityFormProps) {
         name: values.action_name,
         timeIntervalMinutes,
         entityId: entity.id,
-        startsAt,
+        nextAt,
       };
 
       writingPromise = handleCreate(actionCr)
@@ -286,8 +286,8 @@ export default function EntityPanel({ entity, actions }: EntityFormProps) {
 
               <div className="column">
                 <input type="radio" value="later" name="start_date_radio" /> Another date
-                <input disabled={data('start_date_radio') === "now"} type="date" name="starts_at" />
-                {getErrorMessages("starts_at")}
+                <input disabled={data('start_date_radio') === "now"} type="date" name="next_at" />
+                {getErrorMessages("next_at")}
               </div>
             </div>
 

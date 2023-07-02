@@ -58,7 +58,7 @@ export const useEntities = () => {
         name:item.name,
         ownerId: item.entity.owner_id,
         timeIntervalMinutes: item.time_interval_minutes,
-        startsAt: item.starts_at,
+        nextAt: item.next_at,
         ownerUID: uid,
       };
 
@@ -93,7 +93,7 @@ export const useEntities = () => {
         description: actionCr.description,
         entity_id: actionCr.entityId,
         time_interval_minutes: actionCr.timeIntervalMinutes,
-        starts_at: actionCr.startsAt,
+        next_at: actionCr.startsAt,
         owner_uid: uid,
       })
       .select(`
@@ -113,7 +113,7 @@ export const useEntities = () => {
       name:result.data.name,
       ownerId: result.data.entity.owner_id,
       timeIntervalMinutes: result.data.time_interval_minutes,
-      startsAt: new Date(result.data.starts_at),
+      nextAt: new Date(result.data.starts_at),
       ownerUID: uid,
     };
   }
@@ -127,7 +127,7 @@ export const useEntities = () => {
     if (partialAction.name) updateData.name = partialAction.name;
     if (partialAction.description) updateData.description = partialAction.description;
     if (partialAction.timeIntervalMinutes) updateData.time_interval_minutes = partialAction.timeIntervalMinutes;
-    if (partialAction.startsAt) updateData.starts_at = partialAction.startsAt;
+    if (partialAction.nextAt) updateData.next_at = partialAction.nextAt;
     if (partialAction.isDeleted === true) updateData.is_deleted = true;
     
     const result = await supabase

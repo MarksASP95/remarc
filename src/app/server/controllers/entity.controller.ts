@@ -82,7 +82,7 @@ export class EntityController {
         name:item.name,
         ownerId: item.entity.owner_id,
         timeIntervalMinutes: item.time_interval_minutes,
-        startsAt: new Date(item.starts_at),
+        nextAt: new Date(item.next_at),
         ownerUID: item.owner_uid
       };
 
