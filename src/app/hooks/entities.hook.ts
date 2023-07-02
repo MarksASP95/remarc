@@ -93,7 +93,7 @@ export const useEntities = () => {
         description: actionCr.description,
         entity_id: actionCr.entityId,
         time_interval_minutes: actionCr.timeIntervalMinutes,
-        next_at: actionCr.startsAt,
+        next_at: actionCr.nextAt,
         owner_uid: uid,
       })
       .select(`

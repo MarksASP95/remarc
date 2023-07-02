@@ -14,7 +14,6 @@ export interface EntityActionCreate {
   description: string;
   entityId: number;
   timeIntervalMinutes: number;
-  startsAt: Date;
   nextAt: Date;
 }
 export interface EntityAction extends EntityActionCreate, ModelDBData {
