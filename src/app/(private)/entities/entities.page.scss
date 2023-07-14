@@ -18,6 +18,33 @@
       border: 1px solid #606c76;
       border-radius: 5px;
       padding: 1rem;
+
+      .entity-options {
+        display: flex;
+        justify-content: flex-end;
+
+        &__item {
+          width: 30px;
+          height: 30px;
+          border-radius: 4px;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+
+          img {
+            width: 24px;
+            height: 24px;
+            object-fit: cover;
+            object-position: center;
+          }
+          &:hover {
+            background-color: #9a4dca6a
+          }
+          &:first-of-type {
+            margin-right: 10px;
+          }
+        }
+      }
     }
   }
 }

@@ -33,3 +33,5 @@ export interface EntityActionEvent extends EntityActionEventCreate, ModelDBData 
   status: EntityActionEventStatus;
   ownerId: string;
 }
+
+export type EntityEditable = Partial<Pick<Entity, "description" | "name" | "isDeleted">>;

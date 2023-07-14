@@ -1,4 +1,4 @@
-import { Entity, EntityAction, EntityActionCreate, EntityCreate } from '@/models/entity.model';
+import { Entity, EntityAction, EntityActionCreate, EntityCreate, EntityEditable } from '@/models/entity.model';
 import { getSupabaseClient } from '../utils/supabase';
 import { useAuth } from './auth.hooks';
 
@@ -82,6 +82,19 @@ export const useEntities = () => {
     return true;
   }
 
+  const updateEntity = async (id: number, data: EntityEditable): Promise<any> => {
+    const supabase = getSupabaseClient();
+    
+    const updateData: any = {};
+    if (data.description) updateData.description = data.description;
+    if (data.name) updateData.name = data.name;
+    if (data.isDeleted) updateData.is_deleted = data.isDeleted;
+
+    const result = await supabase.from("entity").update(updateData).eq("id", id);
+
+    if (result.error) throw result.error;
+  }
+
   const createEntityAction = async (actionCr: EntityActionCreate): Promise<EntityAction> => {
     const supabase = getSupabaseClient();
     const { uid } = (await getCurrentRemarcUser())!;
@@ -147,5 +160,6 @@ export const useEntities = () => {
     createEntityAction,
     updateEntityAction,
     deleteAction,
+    updateEntity,
   }
 }
